@@ -26,17 +26,14 @@ This module implements a model (in the `MVC` sense) for the real data stored
 in a `ismrmrd.Dataset`.
 """
 
-from qtpy import QtCore
-from qtpy.QtGui import *
-from qtpy.QtWidgets import *
-from qtpy.QtCore import *
+from PyQt5.QtCore import QAbstractTableModel, QModelIndex, Qt
 import TableBuffer
 import ismrmrd
 
 #: The maximum number of rows to be read from the data source.
 CHUNK_SIZE = 1000
 
-class TableModel(QtCore.QAbstractTableModel):
+class TableModel(QAbstractTableModel):
     """
     The model for real data contained in ismrmrd datasets.
 
@@ -92,14 +89,14 @@ class TableModel(QtCore.QAbstractTableModel):
         self.numcols = len(self.colnames)
 
         # track selected cell
-        self.selected_cell = {'index': QtCore.QModelIndex(), 'buffer_start': 0}
+        self.selected_cell = {'index': QModelIndex(), 'buffer_start': 0}
 
         # populate the model with the first chunk of data
         self.loadData(0, self.numrows)
 
         super(TableModel, self).__init__(parent)
 
-    def columnCount(self, index=QtCore.QModelIndex()):
+    def columnCount(self, index=QModelIndex()):
         """The number of columns of the given model index.
 
         Overridden to return 0 for valid indices because they have no children;
@@ -111,7 +108,7 @@ class TableModel(QtCore.QAbstractTableModel):
 
         return 0 if index.isValid() else self.numcols
 
-    def rowCount(self, index=QtCore.QModelIndex()):
+    def rowCount(self, index=QModelIndex()):
         """The number of columns for the children of the given index.
 
         Overridden to return 0 for valid indices because they have no children;
@@ -163,16 +160,16 @@ class TableModel(QtCore.QAbstractTableModel):
         """
 
         # The section alignment
-        if role == QtCore.Qt.TextAlignmentRole:
-            if orientation == QtCore.Qt.Horizontal:
-                return QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter
-            return QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter
+        if role == Qt.TextAlignmentRole:
+            if orientation == Qt.Horizontal:
+                return Qt.AlignLeft | Qt.AlignVCenter
+            return Qt.AlignRight | Qt.AlignVCenter
 
-        if role != QtCore.Qt.DisplayRole:
+        if role != Qt.DisplayRole:
             return None
 
         # Columns-labels
-        if orientation == QtCore.Qt.Horizontal:
+        if orientation == Qt.Horizontal:
             # For tables horizontal labels are column names, for arrays
             # the section numbers are used as horizontal labels
             #if hasattr(self.leaf, 'description'):
@@ -183,7 +180,7 @@ class TableModel(QtCore.QAbstractTableModel):
         # Rows-labels
         return str(self.start + section)
 
-    def data(self, index, role=QtCore.Qt.DisplayRole):
+    def data(self, index, role=Qt.DisplayRole):
         """Returns the data stored under the given role for the item
         referred to by the index.
 
@@ -199,7 +196,7 @@ class TableModel(QtCore.QAbstractTableModel):
         if not index.isValid() or not (0 <= row < self.numrows):
             return None
 
-        if role == QtCore.Qt.DisplayRole:
+        if role == Qt.DisplayRole:
             #cell = self.cell(row, col)
 
             if col < self.numcolsIdx: # index fields
@@ -233,8 +230,8 @@ class TableModel(QtCore.QAbstractTableModel):
 
             return ret
 
-        if role == QtCore.Qt.TextAlignmentRole:
-            return QtCore.Qt.AlignLeft | QtCore.Qt.AlignCenter
+        if role == Qt.TextAlignmentRole:
+            return Qt.AlignLeft | Qt.AlignCenter
 
         return None
 

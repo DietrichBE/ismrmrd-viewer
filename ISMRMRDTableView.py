@@ -36,15 +36,15 @@ tabular way:
 
 __docformat__ = 'restructuredtext'
 
-from qtpy import QtCore
-from qtpy import QtGui
-from qtpy import QtWidgets
+from PyQt5.QtGui import QPalette, QBrush, QFontMetrics
+from PyQt5.QtWidgets import QAbstractItemView, QStyledItemDelegate, QStyle, QTableView, QHeaderView, QAbstractSlider
+from PyQt5.QtCore import Qt, QCoreApplication
 import Scrollbar
 
-_aiv = QtWidgets.QAbstractItemView
+_aiv = QAbstractItemView
 
 
-class TableDelegate(QtWidgets.QStyledItemDelegate):
+class TableDelegate(QStyledItemDelegate):
     """
     A delegate for rendering selected cells.
 
@@ -74,7 +74,7 @@ class TableDelegate(QtWidgets.QStyledItemDelegate):
         """
 
         # option.state is an ORed combination of flags
-        if (option.state & QtWidgets.QStyle.State_Selected):
+        if (option.state & QStyle.State_Selected):
             model = index.model()
             buffer_start = model.start
             cell = index.model().selected_cell
@@ -82,25 +82,25 @@ class TableDelegate(QtWidgets.QStyledItemDelegate):
                     (buffer_start != cell['buffer_start'])):
                 painter.save()
                 self.initStyleOption(option, index)
-                background = option.palette.color(QtGui.QPalette.Base)
-                foreground = option.palette.color(QtGui.QPalette.Text)
-                painter.setBrush(QtGui.QBrush(background))
+                background = option.palette.color(QPalette.Base)
+                foreground = option.palette.color(QPalette.Text)
+                painter.setBrush(QBrush(background))
                 painter.fillRect(option.rect, painter.brush())
                 painter.translate(option.rect.x() + 3, option.rect.y())
-                painter.setBrush(QtGui.QBrush(foreground))
+                painter.setBrush(QBrush(foreground))
                 try:
-                    painter.drawText(option.rect,QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop,model.data(index))
+                    painter.drawText(option.rect,Qt.AlignLeft|Qt.AlignTop,model.data(index))
                 except Exception as e:
                     print(model.data(index))
                     print(e)
                 painter.restore()
             else:
-                QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+                QStyledItemDelegate.paint(self, painter, option, index)
         else:
-            QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
+            QStyledItemDelegate.paint(self, painter, option, index)
 
 
-class TableView(QtWidgets.QTableView):
+class TableView(QTableView):
     """
     A view for real data contained in leaves.
 
@@ -117,7 +117,7 @@ class TableView(QtWidgets.QTableView):
         """
 
         super(TableView, self).__init__(parent)
-        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         self.tmodel = tmodel  # This is a MUST
         self.leaf_numrows = leaf_numrows = self.tmodel.leaf_numrows
         self.selection_model = self.selectionModel()
@@ -134,7 +134,7 @@ class TableView(QtWidgets.QTableView):
         if leaf_numrows > tmodel.numrows:
             self.setItemDelegate(TableDelegate())
             self.rbuffer_fault = False
-            self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+            self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
             self.tricky_vscrollbar = Scrollbar.ScrollBar(self)
             self.max_value = self.tricky_vscrollbar.setMaxValue(
                 self.leaf_numrows)
@@ -142,20 +142,20 @@ class TableView(QtWidgets.QTableView):
             self.interval_size = self.mapSlider2Leaf()
 
         # Setup the vertical header width
-        self.vheader = QtWidgets.QHeaderView(QtCore.Qt.Vertical)
+        self.vheader = QHeaderView(Qt.Vertical)
         self.setVerticalHeader(self.vheader)
         font = self.vheader.font()
         font.setBold(True)
-        fmetrics = QtGui.QFontMetrics(font)
+        fmetrics = QFontMetrics(font)
         max_width = fmetrics.width(" {0} ".format(str(leaf_numrows)))
         self.vheader.setMinimumWidth(max_width)
         self.vheader.setSectionsClickable(True)
-        self.vheader.setSectionResizeMode(QtWidgets.QHeaderView.Fixed);
+        self.vheader.setSectionResizeMode(QHeaderView.Fixed);
         self.vheader.setDefaultSectionSize(24);
         self.vheader.setVisible(False)
 
         # setup column widths
-        metrics = QtGui.QFontMetrics(self.vheader.font())
+        metrics = QFontMetrics(self.vheader.font())
 
         for ind in range(0,len(self.tmodel.colnames)):
             colName = self.tmodel.colnames[ind]
@@ -163,7 +163,7 @@ class TableView(QtWidgets.QTableView):
             self.setColumnWidth(ind,width)
 
         # setup the text elide mode
-        self.setTextElideMode(QtCore.Qt.ElideRight)
+        self.setTextElideMode(Qt.ElideRight)
 
         # connect signals to slots
         if leaf_numrows > tmodel.numrows:
@@ -222,7 +222,7 @@ class TableView(QtWidgets.QTableView):
         tmodel = self.tmodel
 
         self.vheader.headerDataChanged(
-            QtCore.Qt.Vertical, 0, tmodel.numrows - 1)
+            Qt.Vertical, 0, tmodel.numrows - 1)
         top_left = tmodel.index(0, 0)
         bottom_right = tmodel.index(tmodel.numrows - 1,
                                     tmodel.numcols - 1)
@@ -250,11 +250,11 @@ class TableView(QtWidgets.QTableView):
         """
 
         # The QAbstractSlider.SliderAction enum values used in this method
-        # QtGui.QAbstractSlider.SliderSingleStepAdd -> 1
-        # QtGui.QAbstractSlider.SliderSingleStepSub -> 2
-        # QtGui.QAbstractSlider.SliderPageStepAdd -> 3
-        # QtGui.QAbstractSlider.SliderPageStepSub -> 4
-        # QtGui.QAbstractSlider.SliderMove -> 7
+        # QAbstractSlider.SliderSingleStepAdd -> 1
+        # QAbstractSlider.SliderSingleStepSub -> 2
+        # QAbstractSlider.SliderPageStepAdd -> 3
+        # QAbstractSlider.SliderPageStepSub -> 4
+        # QAbstractSlider.SliderMove -> 7
         actions = {
             1: self.addSingleStep,
             2: self.subSingleStep,
@@ -422,11 +422,11 @@ class TableView(QtWidgets.QTableView):
         # We are at top of the dataset
         elif value == self.tricky_vscrollbar.minimum():
             self.vscrollbar.triggerAction(
-                QtWidgets.QAbstractSlider.SliderToMinimum)
+                QAbstractSlider.SliderToMinimum)
         # We are at bottom of the dataset
         elif value == self.tricky_vscrollbar.maximum():
             self.vscrollbar.triggerAction(
-                QtWidgets.QAbstractSlider.SliderToMaximum)
+                QAbstractSlider.SliderToMaximum)
         # we are somewhere in the middle of the dataset
         else:
             self.scrollTo(
@@ -450,7 +450,7 @@ class TableView(QtWidgets.QTableView):
             position = 0
             hint = _aiv.PositionAtTop
             self.vscrollbar.triggerAction(
-                QtWidgets.QAbstractSlider.SliderToMinimum)
+                QAbstractSlider.SliderToMinimum)
         else:
             start = row - table_rows
             position = table_rows - 1
@@ -478,7 +478,7 @@ class TableView(QtWidgets.QTableView):
             position = table_rows - 1
             hint = _aiv.PositionAtBottom
             self.vscrollbar.triggerAction(
-                QtWidgets.QAbstractSlider.SliderToMinimum)
+                QAbstractSlider.SliderToMinimum)
         else:
             start = row
             position = 0
@@ -510,7 +510,7 @@ class TableView(QtWidgets.QTableView):
             # Filter the event so it will not be passed to the parent widget
             event.accept()
         else:
-            QtWidgets.QTableView.wheelEvent(self, event)
+            QTableView.wheelEvent(self, event)
 
     def wheelDown(self, event):
         """Setup data for wheeling with the mouse towards the last section.
@@ -533,7 +533,7 @@ class TableView(QtWidgets.QTableView):
             self.scrollTo(model.index(new_start - model.start, 0),
                           _aiv.PositionAtTop)
         else:
-            QtCore.QCoreApplication.sendEvent(self.vscrollbar, event)
+            QCoreApplication.sendEvent(self.vscrollbar, event)
 
     def wheelUp(self, event):
         """Setup data for wheeling with the mouse towards the first section.
@@ -557,7 +557,7 @@ class TableView(QtWidgets.QTableView):
                     new_start + table_rows - model.start - 1, 0),
                 _aiv.PositionAtBottom)
         else:
-            QtCore.QCoreApplication.sendEvent(self.vscrollbar, event)
+            QCoreApplication.sendEvent(self.vscrollbar, event)
 
     def keyPressEvent(self, event):
         """Handle basic cursor movement for key events.
@@ -567,28 +567,28 @@ class TableView(QtWidgets.QTableView):
 
         if self.tmodel.numrows < self.leaf_numrows:
             key = event.key()
-            if key == QtCore.Qt.Key_Home:
+            if key == Qt.Key_Home:
                 event.accept()
                 self.homeKeyPressEvent()
-            elif key == QtCore.Qt.Key_End:
+            elif key == Qt.Key_End:
                 event.accept()
                 self.endKeyPressEvent()
-            elif key == QtCore.Qt.Key_Up:
+            elif key == Qt.Key_Up:
                 event.accept()
                 self.upKeyPressEvent(event)
-            elif key == QtCore.Qt.Key_Down:
+            elif key == Qt.Key_Down:
                 event.accept()
                 self.downKeyPressEvent(event)
-            elif key == QtCore.Qt.Key_PageUp:
+            elif key == Qt.Key_PageUp:
                 event.accept()
                 self.pageUpKeyPressEvent(event)
-            elif key == QtCore.Qt.Key_PageDown:
+            elif key == Qt.Key_PageDown:
                 event.accept()
                 self.pageDownKeyPressEvent(event)
             else:
-                QtWidgets.QTableView.keyPressEvent(self, event)
+                QTableView.keyPressEvent(self, event)
         else:
-            QtWidgets.QTableView.keyPressEvent(self, event)
+            QTableView.keyPressEvent(self, event)
 
     def homeKeyPressEvent(self):
         """Specialised handler for the `Home` key press event.
@@ -684,7 +684,7 @@ class TableView(QtWidgets.QTableView):
             self.scrollTo(index,
                           _aiv.PositionAtTop)
         else:
-            QtWidgets.QTableView.keyPressEvent(self, event)
+            QTableView.keyPressEvent(self, event)
 
         # Eventually synchronize the position of the visible scrollbar
         # with the displayed data using the first visible cell as
@@ -715,7 +715,7 @@ class TableView(QtWidgets.QTableView):
             self.scrollTo(index,
                           _aiv.PositionAtTop)
         else:
-            QtWidgets.QTableView.keyPressEvent(self, event)
+            QTableView.keyPressEvent(self, event)
 
         # Eventually synchronize the position of the visible scrollbar
         # with the displayed data using the first visible cell as
@@ -747,7 +747,7 @@ class TableView(QtWidgets.QTableView):
             self.scrollTo(index,
                           _aiv.PositionAtBottom)
         else:
-            QtWidgets.QTableView.keyPressEvent(self, event)
+            QTableView.keyPressEvent(self, event)
 
         # Eventually synchronize the position of the visible scrollbar
         # with the displayed data using the first visible cell as
@@ -779,7 +779,7 @@ class TableView(QtWidgets.QTableView):
             self.scrollTo(index,
                           _aiv.PositionAtBottom)
         else:
-            QtWidgets.QTableView.keyPressEvent(self, event)
+            QTableView.keyPressEvent(self, event)
 
         # Eventually synchronize the position of the visible scrollbar
         # with the displayed data using the first visible cell as
@@ -810,7 +810,7 @@ class TableView(QtWidgets.QTableView):
         - `previous`: the previous current index
         """
 
-        QtWidgets.QTableView.currentChanged(self, current, previous)
+        QTableView.currentChanged(self, current, previous)
         if self.tmodel.numrows < self.leaf_numrows:
             self.valid_current_buffer = self.tmodel.start
 
@@ -849,4 +849,4 @@ class TableView(QtWidgets.QTableView):
                     'buffer_start': model.start,
                 }
         else:
-            QtWidgets.QTableView.selectionChanged(self, selected, deselected)
+            QTableView.selectionChanged(self, selected, deselected)

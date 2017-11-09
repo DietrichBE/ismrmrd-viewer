@@ -18,20 +18,13 @@
 
 import sys
 import os.path
-import time
-import numpy as np
-import pyqtgraph as pg
+import webbrowser
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter
+from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import Qt
 import ismrmrd
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 import images_qr
-
-# add the folder of this script to the path
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
-import ISMRMRDTableView, ISMRMRDTableModel
-import ISMRMRDPlotWidgets
+import ISMRMRDTableView, ISMRMRDTableModel, ISMRMRDPlotWidgets
 
 
 class ISMRMRDViewer(QMainWindow):
@@ -54,12 +47,14 @@ class ISMRMRDViewer(QMainWindow):
         self.tableView = ISMRMRDTableView.TableView(self.tableModel)
 
         # create plot area
-        #self.plotWidget = pg.PlotWidget()
         self.plotWidget = ISMRMRDPlotWidgets.ISMRMRDPlotWidget(self.tableModel,self.tableView)
 
         # connect table selection change to plot update function
         selectionModel = self.tableView.selectionModel()
         selectionModel.selectionChanged.connect(self.plotWidget.updatePlot)
+
+        # connect xml button click event
+        self.plotWidget.btnXML.clicked.connect(self.showXML)
 
         # set layout and widgets
         _widget = QWidget()
@@ -80,6 +75,18 @@ class ISMRMRDViewer(QMainWindow):
         #self.resize(1000,600)
         #self.show()
         self.showMaximized()
+
+    def showXML(self):
+        # get the xml string
+        xml = self.dset.read_xml_header()
+
+        # write xml to temporary file
+        tempFile = "temp.xml"
+        with open(tempFile, "wb") as textFile:
+            textFile.write(xml)
+
+        # open xml viewer (browser)
+        webbrowser.open(tempFile)
 
  
 if __name__ == "__main__":

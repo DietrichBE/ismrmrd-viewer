@@ -31,7 +31,6 @@ are painted much faster too.
 """
 
 import numpy
-import ismrmrd
 
 class TableBuffer(object):
     """Buffer used to access the real data contained in ISMRMRD (HDF5) files.

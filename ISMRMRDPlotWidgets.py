@@ -16,13 +16,10 @@
 #
 # Author: Benjamin Dietrich, dietrich@biomed.ee.ethz.ch
 
-import sys
 import numpy as np
 import pyqtgraph as pg
 import ismrmrd
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QWidget, QComboBox, QPushButton, QHBoxLayout, QVBoxLayout, QLabel
 
 class ISMRMRDPlotWidget(QWidget):
     def __init__(self,tableModel,tableView,parent=None):
@@ -31,7 +28,7 @@ class ISMRMRDPlotWidget(QWidget):
         self.tableModel = tableModel
         self.tableView = tableView
 
-        # coil data plot selection combobox
+        # coil data plot selection drop down
         self.rawCB = QComboBox()
         self.rawCB.addItem('')
         self.rawCB.addItem('Magnitude')
@@ -42,12 +39,16 @@ class ISMRMRDPlotWidget(QWidget):
         self.rawCB.addItem('Phase (unwrapped)')
         self.rawCB.setCurrentIndex(1)
 
-        # trajectory plot selection combobox
+        # trajectory plot selection drop down
         self.trajCB = QComboBox()
         self.trajCB.addItem('')
         self.trajCB.addItem('Magnitude')
         self.trajCB.addItem('FFT (magnitude)')
         self.trajCB.setCurrentIndex(1)
+
+        # show XML button
+        self.btnXML = QPushButton('XML')
+        self.btnXML.setFixedHeight(22)
 
         # control bar layout
         self.ctrlBarBox = QHBoxLayout()
@@ -56,6 +57,8 @@ class ISMRMRDPlotWidget(QWidget):
         self.ctrlBarBox.addWidget(self.rawCB)
         self.ctrlBarBox.addWidget(QLabel('Trajectory plot:'))
         self.ctrlBarBox.addWidget(self.trajCB)
+        self.ctrlBarBox.addWidget(QLabel('  '))
+        self.ctrlBarBox.addWidget(self.btnXML)
         self.ctrlBarBox.addStretch(1)
         
         # create raw and trajectory plot widgets
@@ -74,7 +77,6 @@ class ISMRMRDPlotWidget(QWidget):
 
         self.resize(self.sizeHint())
         tabelHeight = self.tableView.height()
-        print(tabelHeight)
         self.rawPlot.setMinimumHeight(tabelHeight/2)
         self.trajPlot.setMinimumHeight(tabelHeight/2)
 
@@ -167,5 +169,4 @@ class ISMRMRDPlotWidget(QWidget):
                 self.trajPlot.plot(dataOut[:,ind],pen=pg.mkPen(color),name=' Channel ' + str(ind))
         else:
             self.trajPlot.hide()
-
 
