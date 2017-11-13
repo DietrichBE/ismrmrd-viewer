@@ -19,6 +19,7 @@
 import sys
 import os.path
 import webbrowser
+import tempfile
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
@@ -81,7 +82,7 @@ class ISMRMRDViewer(QMainWindow):
         xml = self.dset.read_xml_header()
 
         # write xml to temporary file
-        tempFile = "temp.xml"
+        tempFile = tempfile.gettempdir() + '\\ISMRMRDViewerTempXML.xml'
         with open(tempFile, "wb") as textFile:
             textFile.write(xml)
 
