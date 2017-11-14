@@ -82,7 +82,7 @@ class ISMRMRDViewer(QMainWindow):
         xml = self.dset.read_xml_header()
 
         # write xml to temporary file
-        tempFile = tempfile.gettempdir() + '\\ISMRMRDViewerTempXML.xml'
+        tempFile = os.path.join(tempfile.gettempdir(),'ISMRMRDViewerTempXML.xml')
         with open(tempFile, "wb") as textFile:
             textFile.write(xml)
 
