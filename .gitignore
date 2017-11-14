@@ -1,0 +1,10 @@
+*~
+*.h5
+*.pyc
+MANIFEST
+build/
+dist/
+__pycache__
+*.swp
+*.egg-info
+*.spec
