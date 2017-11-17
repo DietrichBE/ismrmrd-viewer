@@ -36,10 +36,11 @@ tabular way:
 
 __docformat__ = 'restructuredtext'
 
-from PyQt5.QtGui import QPalette, QBrush, QFontMetrics
-from PyQt5.QtWidgets import QAbstractItemView, QStyledItemDelegate, QStyle, QTableView, QHeaderView, QAbstractSlider
-from PyQt5.QtCore import Qt, QCoreApplication
+from PyQt5.QtGui import QPalette, QBrush, QFontMetrics, QHoverEvent, QCursor
+from PyQt5.QtWidgets import QAbstractItemView, QStyledItemDelegate, QStyle, QTableView, QHeaderView, QAbstractSlider, QToolTip
+from PyQt5.QtCore import Qt, QCoreApplication, QPoint
 import Scrollbar
+import ismrmrd
 
 _aiv = QAbstractItemView
 
@@ -128,6 +129,16 @@ class TableView(QTableView):
         self.setVerticalScrollMode(_aiv.ScrollPerItem)
         self.vscrollbar = self.verticalScrollBar()
 
+        # configure move over event capture
+        self.clicked.connect(self.cellClicked)
+
+        # get flag names for flag tooltip
+        self.flagsDict = {}
+        for name,value in ismrmrd.__dict__.items():
+            if name.startswith('ACQ_'):
+                self.flagsDict[value] = name
+
+        # set data model
         self.setModel(tmodel)
 
         # For potentially huge datasets use a customised scrollbar
@@ -170,7 +181,39 @@ class TableView(QTableView):
             self.tricky_vscrollbar.actionTriggered.connect(self.navigateWithMouse)
 
         ## Instead of invoking updateView().
+
         self.setSpan(0, 0, *tmodel.get_corner_span())
+
+
+    def cellClicked(self,clickedIndex):
+        """
+        Show tooltip with flag names upon "flag" cell selection.
+        """
+
+        if self.tmodel.colnames[clickedIndex.column()] == 'flags':
+            # get the cell value (and convert to integer)
+            x = int(self.tmodel.data(clickedIndex))
+
+            # extract reversed bit string => index 0 returns LSB
+            bits = format(x,'b')[::-1]
+
+            # extract flag names using the flag dictionary
+            text = ''
+            for indBit in range(0,len(bits)):
+                if bits[indBit] != '0':
+                    try:
+                        text += self.flagsDict[indBit+1] + '\n'
+                    except Exception as e:
+                        text += 'Unknown FLAG!!!\n'
+
+            # remove last new line character
+            text = text[0:-1]
+
+            # get mouse position and display tooltip
+            cursor = QCursor()
+            point = QPoint(cursor.pos().x() + 10, cursor.pos().y() + 10)
+            QToolTip.showText(point,text)
+
 
     def mapSlider2Leaf(self):
         """Setup the interval size.
