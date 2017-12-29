@@ -197,7 +197,6 @@ class TableModel(QAbstractTableModel):
             return None
 
         if role == Qt.DisplayRole:
-            #cell = self.cell(row, col)
 
             if col < self.numcolsIdx: # index fields
                 aq = ismrmrd.Acquisition(self.rbuffer.getCell(row)['head'])
@@ -209,7 +208,7 @@ class TableModel(QAbstractTableModel):
 
             # check if the current cell is the encoding counter field
             if isinstance(cell,ismrmrd.EncodingCounters):
-                return 'hallo'
+                return None
             else: # otherwise no special treatment
                 # check what kind of data we have at hand (array or scalar)
                 try:
@@ -228,7 +227,7 @@ class TableModel(QAbstractTableModel):
                     # if error => we have a scalar
                     ret = str(cell)
 
-            return ret
+                return ret
 
         if role == Qt.TextAlignmentRole:
             return Qt.AlignLeft | Qt.AlignCenter

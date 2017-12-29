@@ -47,8 +47,7 @@ class ISMRMRDPlotWidget(QWidget):
         self.trajCB.setCurrentIndex(1)
 
         # show XML button
-        self.btnXML = QPushButton('XML')
-        self.btnXML.setFixedHeight(22)
+        self.btnXML = QPushButton('Show XML header')
 
         # control bar layout
         self.ctrlBarBox = QHBoxLayout()

@@ -20,7 +20,7 @@ import sys
 import os.path
 import webbrowser
 import tempfile
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QSplitter, QMessageBox
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 import ismrmrd
@@ -33,14 +33,18 @@ class ISMRMRDViewer(QMainWindow):
         super(ISMRMRDViewer,self).__init__(parent)
 
         # set icon
-        #self.setWindowIcon(QIcon(os.path.join(os.path.dirname(sys.modules[__name__].__file__),'icon_256.ico')))
         self.setWindowIcon(QIcon(':/icon_256.ico'))
 
-        # open ISMRMRD data file
+        # open ISMRMRD file
         try:
             self.dset = ismrmrd.Dataset(fileName, '/dataset', False)
         except Exception as e:
-            print('ERROR: Could not read file!')
+            msg = QMessageBox()
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowIcon(QIcon(':/icon_256.ico'))
+            msg.setWindowTitle("ISMRMRD Viewer Error")
+            msg.setText("Could not read specified file!")
+            msg.exec_()
             quit()
         
         # create table view
@@ -86,7 +90,7 @@ class ISMRMRDViewer(QMainWindow):
         with open(tempFile, "wb") as textFile:
             textFile.write(xml)
 
-        # open xml viewer (browser)
+        # open xml viewer (web browser)
         webbrowser.open(tempFile)
 
  
@@ -101,5 +105,13 @@ if __name__ == "__main__":
         appWin = ISMRMRDViewer(fileName)
         app.exec_()
     else:
-        print('ERROR: Expecting an ISMRMRD file as argument!')
+        # show a message box to inform the user that he needs to specify a file
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Critical)
+        msg.setWindowIcon(QIcon(':/icon_256.ico'))
+        msg.setWindowTitle("ISMRMRD Viewer Error")
+        msg.setText("No input file specified!")
+        msg.exec_()
+
+
 

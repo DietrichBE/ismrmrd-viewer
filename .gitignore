@@ -8,3 +8,4 @@ __pycache__
 *.swp
 *.egg-info
 *.spec
+/.vs
