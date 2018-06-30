@@ -89,23 +89,20 @@ class ISMRMRDPlotWidget(QWidget):
         rawIndex = self.rawCB.currentIndex()
         trajIndex = self.trajCB.currentIndex()
 
+        # get current acquisition if data or trajectory plot enabled
         if rawIndex != 0 or trajIndex != 0:
-            # get currently selected row and column from table view
+            # get currently selected row from table view
             row = self.tableView.currentIndex().row()
-            col = self.tableView.currentIndex().column()
-            #print('(' + str(row) + ',' + str(col) + ')')
 
             # read corresponding acquisiton from table model buffer
             aq = ismrmrd.Acquisition(self.tableModel.rbuffer.getCell(row)['head'])
 
         # update raw data plot
         if rawIndex != 0:
-            self.rawPlot.show()
-
             # get the data
             data = self.tableModel.rbuffer.getCell(row)['data'].view(np.complex64).reshape((aq.active_channels, aq.number_of_samples))[:]
         
-            # apply visualization selection
+            # modifiy data depending on selected visualization
             if self.rawCB.currentText() == 'Real':
                 dataOut = np.real(data)
             elif self.rawCB.currentText() == 'Imag':
@@ -134,18 +131,18 @@ class ISMRMRDPlotWidget(QWidget):
             for ind in range(0,len(dataOut)):
                 color = pg.intColor(ind)
                 self.rawPlot.plot(dataOut[ind,:],pen=pg.mkPen(color),name=' Channel ' + str(ind))
+
+            self.rawPlot.show()
         else:
             self.rawPlot.hide()
 
 
         # update trajectory plot
         if self.trajCB.currentIndex() != 0 and aq.traj.size > 0:
-            self.trajPlot.show()
-
             # get the data
             data = self.tableModel.rbuffer.getCell(row)['traj'].reshape((aq.number_of_samples,aq.trajectory_dimensions))[:]
         
-            # apply visualization selection
+            # modifiy data depending on selected visualization
             if self.trajCB.currentText() == 'FFT (magnitude)':
                 dataOut = abs(np.fft.fft(data))
             else:
@@ -166,6 +163,8 @@ class ISMRMRDPlotWidget(QWidget):
             for ind in range(0,dataOut.shape[1]):
                 color = pg.intColor(ind)
                 self.trajPlot.plot(dataOut[:,ind],pen=pg.mkPen(color),name=' Channel ' + str(ind))
+
+            self.trajPlot.show()
         else:
             self.trajPlot.hide()
 

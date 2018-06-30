@@ -227,7 +227,7 @@ class TableView(QTableView):
         Note that the larger is the number of rows the worse is this
         approach. In the worst case we would have an interval size of
         (2**64 - 1)/(2**31 - 1) = 2**33. Nevertheless the approach is
-        quite good for number of rows about 2**33 (eight thousand million
+        quite good for number of rows about 2**33 (eight thousand milliong
         rows). In this case the interval size is about 4.
         """
 

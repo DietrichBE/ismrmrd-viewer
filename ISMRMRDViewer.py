@@ -27,7 +27,6 @@ import ismrmrd
 import images_qr
 import ISMRMRDTableView, ISMRMRDTableModel, ISMRMRDPlotWidgets
 
-
 class ISMRMRDViewer(QMainWindow):
     def __init__(self,fileName,parent=None):
         super(ISMRMRDViewer,self).__init__(parent)
@@ -35,7 +34,7 @@ class ISMRMRDViewer(QMainWindow):
         # set icon
         self.setWindowIcon(QIcon(':/icon_256.ico'))
 
-        # open ISMRMRD file
+        # try to open ISMRMRD file
         try:
             self.dset = ismrmrd.Dataset(fileName, '/dataset', False)
         except Exception as e:
@@ -47,21 +46,20 @@ class ISMRMRDViewer(QMainWindow):
             msg.exec_()
             quit()
         
-        # create table view
+        # create table model and view
         self.tableModel = ISMRMRDTableModel.TableModel(self.dset)
         self.tableView = ISMRMRDTableView.TableView(self.tableModel)
 
         # create plot area
         self.plotWidget = ISMRMRDPlotWidgets.ISMRMRDPlotWidget(self.tableModel,self.tableView)
 
-        # connect table selection change to plot update function
-        selectionModel = self.tableView.selectionModel()
-        selectionModel.selectionChanged.connect(self.plotWidget.updatePlot)
+        # connect table selection change event to plot update function
+        self.tableView.selectionModel().selectionChanged.connect(self.plotWidget.updatePlot)
 
-        # connect xml button click event
+        # connect xml button click event to handler method
         self.plotWidget.btnXML.clicked.connect(self.showXML)
 
-        # set layout and widgets
+        # set window layout and widgets
         _widget = QWidget()
         _layout = QVBoxLayout(_widget)
         self.splitter = QSplitter()
@@ -77,8 +75,6 @@ class ISMRMRDViewer(QMainWindow):
         self.setAttribute(Qt.WA_DeleteOnClose)
         
         # show window
-        #self.resize(1000,600)
-        #self.show()
         self.showMaximized()
 
     def showXML(self):
@@ -93,11 +89,12 @@ class ISMRMRDViewer(QMainWindow):
         # open xml viewer (web browser)
         webbrowser.open(tempFile)
 
- 
+
+# main application entry point
 if __name__ == "__main__":
     app  = QApplication(sys.argv)
     
-    # check command line arguments => filename
+    # check command line arguments => we expect a filepath
     if len(sys.argv) > 1:
         fileName = sys.argv[1]
 
@@ -105,13 +102,11 @@ if __name__ == "__main__":
         appWin = ISMRMRDViewer(fileName)
         app.exec_()
     else:
-        # show a message box to inform the user that he needs to specify a file
+        # show a message box to inform the user that he needs to supply a file
+        # path as application argument
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
         msg.setWindowIcon(QIcon(':/icon_256.ico'))
         msg.setWindowTitle("ISMRMRD Viewer Error")
         msg.setText("No input file specified!")
         msg.exec_()
-
-
-
