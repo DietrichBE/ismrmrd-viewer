@@ -44,6 +44,9 @@ import ismrmrd
 
 _aiv = QAbstractItemView
 
+# Suppress Qt warnings
+import os
+os.environ['QT_LOGGING_RULES'] = 'qt.qpa.*=false'
 
 class TableDelegate(QStyledItemDelegate):
     """
@@ -181,8 +184,8 @@ class TableView(QTableView):
             self.tricky_vscrollbar.actionTriggered.connect(self.navigateWithMouse)
 
         ## Instead of invoking updateView().
-
-        self.setSpan(0, 0, *tmodel.get_corner_span())
+        if self.columnSpan(0, 0) != 1:
+            self.setSpan(0, 0, *tmodel.get_corner_span())
 
 
     def cellClicked(self,clickedIndex):
