@@ -76,8 +76,8 @@ class ISMRMRDPlotWidget(QWidget):
 
         self.resize(self.sizeHint())
         tabelHeight = self.tableView.height()
-        self.rawPlot.setMinimumHeight(tabelHeight/2)
-        self.trajPlot.setMinimumHeight(tabelHeight/2)
+        self.rawPlot.setMinimumHeight(int(tabelHeight/2))
+        self.trajPlot.setMinimumHeight(int(tabelHeight/2))
 
         # connect combobox change events to plot update function
         self.rawCB.currentIndexChanged.connect(self.updatePlot)
@@ -120,7 +120,8 @@ class ISMRMRDPlotWidget(QWidget):
             for item in self.rawPlot.items():
                 self.rawPlot.removeItem(item)
             try:
-                self.rawPlot.legend.scene().removeItem(self.rawPlot.legend)
+                if self.rawPlot.legend.scene() is not None:
+                    self.rawPlot.legend.scene().removeItem(self.rawPlot.legend)
             except Exception as e:
                 print(e)
 
@@ -152,7 +153,8 @@ class ISMRMRDPlotWidget(QWidget):
             for item in self.trajPlot.items():
                 self.trajPlot.removeItem(item)
             try:
-                self.trajPlot.legend.scene().removeItem(self.trajPlot.legend)
+                if self.rawPlot.legend.scene() is not None:
+                    self.trajPlot.legend.scene().removeItem(self.trajPlot.legend)
             except Exception as e:
                 print(e)
 
